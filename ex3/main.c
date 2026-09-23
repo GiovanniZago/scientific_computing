@@ -8,8 +8,8 @@ int main(void) {
     char *line = NULL;
     size_t len = 0;
     ssize_t nread;
-    int N = 100;
-    float a=32.1, b=5.99;
+    int N;
+    float a, b;
 
     printf("Enter N (integer matrix size)\n");
     if ((nread = getline(&line, &len, stdin)) != -1) {
@@ -119,5 +119,8 @@ int main(void) {
     }
     else {
         printf("Test failed, Reference: %d, Sum: %f\n", N, sum);
+        exit(EXIT_FAILURE);
     }
+
+    return 0;
 }
