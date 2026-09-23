@@ -50,6 +50,7 @@ int main(void) {
     
     // define reference
     float ref = a * x + y;
+    printf("\n\n\n");
     printf("Reference value: %f\n", ref);
 
     // allocate vectors
@@ -57,13 +58,10 @@ int main(void) {
     float *y_vec = malloc(N * sizeof(float));
     float *d_vec = malloc(N * sizeof(float));
 
+    // vector addition
     for (int i = 0; i < N; ++i) {
         x_vec[i] = x;
         y_vec[i] = y;
-    }
-
-    // vector addition
-    for (int i = 0; i < N; ++i) {
         d_vec[i] = a * x_vec[i] + y_vec[i];
     }
 
