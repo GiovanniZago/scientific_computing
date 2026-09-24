@@ -68,21 +68,49 @@ double lpBackward(int M, int L, double x) {
 }
 
 int main(void) {
-    double x = 0.5;
-    int L = 5;
+    int L_max = 50, M = 500;
+    double x[] = {0.1, 0.5, 0.9, 0.99};
+    int N_points = sizeof(x) / sizeof(x[0]);
+
+    // open file
+    FILE* fptr = fopen("out.csv", "w");
+    if (fptr == NULL) {
+        printf("Error in opening file\n");
+        exit(EXIT_FAILURE);
+    }
+
+    fprintf(fptr, "i,L,res_gsl,res_direct,err_abs_direct,err_rel_direct,res_back,err_abs_back,err_rel_back\n");
+
+    for (int i = 0; i < N_points; ++i) {
+        for (int L = 0; L <= L_max; ++L) {
+            // reference
+            double res_gsl = gsl_sf_legendre_Pl(L, x[i]);
+
+            // direct
+            double res_direct = lpDirect(L, x[i]);
+            double err_abs_direct = fabs(res_direct - res_gsl);
+            double err_rel_direct = err_abs_direct / fabs(res_gsl);
+            
+            // backward
+            double res_back = lpBackward(M, L, x[i]);
+            double err_abs_back = fabs(res_back - res_gsl);
+            double err_rel_back = err_abs_back / fabs(res_gsl);
+
+            fprintf(fptr,
+                    "%d,%d,%.7lf,%.7lf,%.7e,%.7e,%.7lf,%.7e,%.7e\n",
+                    i,
+                    L,
+                    res_gsl,
+                    res_direct,
+                    err_abs_direct,
+                    err_rel_direct,
+                    res_back,
+                    err_abs_back,
+                    err_rel_back);
+        }
+    }
     
-    // GNU GSL reference
-    double res_gsl = gsl_sf_legendre_Pl(L, x);
-    printf("(GSL) P_%d(%f) = %f\n", L, x, res_gsl);
-
-    // direct recurrence
-    double res_direct = lpDirect(L, x);
-    printf("(Bonnet/Direct) P_%d(%f) = %f\n", L, x, res_direct);
-
-    // backward recurrence
-    int M = 500;
-    double res_back = lpBackward(M, L, x);
-    printf("(Miller/backward) P_%d(%f) = %f\n", L, x, res_back);
+    fclose(fptr);
 
     return 0;
 }

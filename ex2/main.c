@@ -68,7 +68,7 @@ int main(void) {
     // result check
     int errors = 0;
     for (int i = 0; i < N; ++i) {
-        if (fabs(d_vec[i] - ref) > 1e-8) {
+        if (fabs(d_vec[i] - ref) > 1e-8f) {
             ++errors;
         }
     }
