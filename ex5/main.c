@@ -2,8 +2,9 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <math.h>
+#include <gsl/gsl_sf_legendre.h>
 
-double lp_direct(int L, double x) {
+double lpDirectRec(int L, double x) {
     if (L == 0) {
         return 1.0;
     }
@@ -17,50 +18,71 @@ double lp_direct(int L, double x) {
     double c1 = (2.0 * M + 1.0) / (M + 1.0);
     double c2 = (-1.0) * M / (M + 1.0);
 
-    double t1 = c1 * x * lp_direct(M, x);
-    double t2 = c2 * lp_direct(M - 1, x);
+    double t1 = c1 * x * lpDirectRec(M, x);
+    double t2 = c2 * lpDirectRec(M - 1, x);
 
     return t1 + t2;
 }
 
-double lp_backward(int M, int L, double x) {
+double lpDirect(int L, double x) {
+    double p_m = 1.0, p = x, p_n = 0.0;
+
+    for (int i = 1; i < L; ++i) {
+        double c1 = (2.0 * i + 1.0) / (i + 1.0);
+        double c2 = (-1.0) * i / (i + 1.0);
+
+        p_n = c1 * x * p + c2 * p_m;
+        
+        p_m = p;
+        p = p_n;
+    } 
+
+    return p;
+}
+
+double lpBackward(int M, int L, double x) {
     if (M < L) {
-        printf("Invalid parameters: M is supposed to be greater than L.\n");
+        printf("Invalid M value. M should be greater than L (M > L).\n");
         exit(EXIT_FAILURE);
     }
 
-    if (L == M + 1) {
-        return 0.0;
+    // intialize values
+    double p = 0.0, p_n = 1.0, p_nn = 0.0;
+    double p_l = 0.0;
+
+    for (int i = M; i >= 1; --i) {
+        double c1 = (2.0 * i + 1.0) / i;
+        double c2 = (-1.0) * (i + 1.0) / i;
+
+        p = c1 * x * p_n + c2 * p_nn;
+        
+        if (i == L + 1) {
+            p_l = p;
+        }
+
+        p_nn = p_n;
+        p_n = p;
     }
 
-    if (L == M) {
-        return 1.0;
-    }
-
-    int N = L + 1;
-
-    double c1 = (2.0 * N + 1.0) / N;
-    double c2 = (-1.0) * (N + 1.0) / N;
-
-    double t1 = c1 * x * lp_backward(M, N, x);
-    double t2 = c2 * lp_backward(M, N + 1, x);
-
-    return t1 + t2;
+    return p_l / p;
 }
 
 int main(void) {
-    double x = 1.5;
-    int L = 5, M = 50;
+    double x = 0.5;
+    int L = 5;
+    
+    // GNU GSL reference
+    double res_gsl = gsl_sf_legendre_Pl(L, x);
+    printf("(GSL) P_%d(%f) = %f\n", L, x, res_gsl);
 
     // direct recurrence
-    double res_direct = lp_direct(L, x);
-    printf("P_%d(%f) = %f\n", L, x, res_direct);
+    double res_direct = lpDirect(L, x);
+    printf("(Bonnet/Direct) P_%d(%f) = %f\n", L, x, res_direct);
 
     // backward recurrence
-    double res_back = lp_backward(M, L, x);
-    double c_norm = lp_backward(M, 0, x);
-    res_back = 
-    printf("P_%d(%f) = %f\n", L, x, res_back);
+    int M = 500;
+    double res_back = lpBackward(M, L, x);
+    printf("(Miller/backward) P_%d(%f) = %f\n", L, x, res_back);
 
     return 0;
 }
