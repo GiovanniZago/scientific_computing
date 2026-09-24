@@ -2,4 +2,5 @@
 *.txt
 *.png
 *.csv
+*.h5
 parser

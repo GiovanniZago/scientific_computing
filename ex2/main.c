@@ -48,11 +48,6 @@ int main(void) {
 
     free(line);
     
-    // define reference
-    float ref = a * x + y;
-    printf("\n\n\n");
-    printf("Reference value: %f\n", ref);
-
     // allocate vectors
     float *x_vec = malloc(N * sizeof(float));
     float *y_vec = malloc(N * sizeof(float));
@@ -66,11 +61,15 @@ int main(void) {
     }
 
     // result check
+    float ref = a * x + y;
+    double sum = 0.0;
     int errors = 0;
     for (int i = 0; i < N; ++i) {
         if (fabs(d_vec[i] - ref) > 1e-8f) {
             ++errors;
         }
+
+        sum += d_vec[i];
     }
 
     // free memory
@@ -79,7 +78,9 @@ int main(void) {
     free(d_vec);
 
     // print results
+    printf("\n\n\n");
     printf("Errors found: %d\n", errors);
+    printf("Element-wise sum: %lf\n", sum);
 
     return 0;
 }
