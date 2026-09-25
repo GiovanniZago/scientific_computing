@@ -6,7 +6,7 @@
  * signal. This is one of the most important beginner lessons in numerical data
  * analysis for physics students.
  *
- * The program studies three cases:
+ * The program studies four cases:
  *
  * 1. good_sampling
  *    The sampling rate is high enough to capture both frequency components.
@@ -18,6 +18,9 @@
  * 3. short_record
  *    The record length is too short to separate 50 Hz and 55 Hz clearly,
  *    illustrating limited frequency resolution.
+ *
+ * 4. long_record
+ *    The same signal sampled for eight times longer separates the two peaks.
  *
  * The generated CSV files can be plotted with either gnuplot or Python.
  */
@@ -291,6 +294,13 @@ int main(int argc, char **argv)
             512.0,
             64U,
         },
+        {
+            "long_record",
+            "Option B: a longer record at the same sampling rate separates the 50 Hz and 55 Hz components.",
+            close_frequencies_signal,
+            512.0,
+            512U,
+        },
     };
     size_t i;
 
@@ -307,7 +317,7 @@ int main(int argc, char **argv)
     printf("Sampling and FFT demonstration\n");
     printf("==============================\n");
     printf("This program writes CSV files that can be plotted with gnuplot, Python, or Julia.\n");
-    printf("Read the three cases as a small numerical experiment on sampling strategy.\n\n");
+    printf("Read the four cases as a small numerical experiment on sampling strategy.\n\n");
 
     for (i = 0; i < sizeof(cases) / sizeof(cases[0]); ++i) {
         if (!fftu_is_power_of_two(cases[i].sample_count)) {

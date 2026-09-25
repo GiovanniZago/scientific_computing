@@ -1,6 +1,6 @@
 # FFT worksheet solution
 
-Completed from [LESSONS.md](LESSONS.md) on 2026-09-25. Parts 1–6 use the original parameters. Part 7 uses **option B only**. The optional extension was not undertaken.
+Completed from [LESSONS.md](LESSONS.md). The original cases remain available, and Part 7's **option B** is included as a fourth, longer-record case.
 
 ## Part 1: Before running anything
 
@@ -10,9 +10,9 @@ Completed from [LESSONS.md](LESSONS.md) on 2026-09-25. Parts 1–6 use the origi
 
 ## Part 2: Build and run
 
-Ran `make run` successfully, then `make -B run` to force compilation of all sources. The rebuild completed without compiler warnings. The full build and numerical output are saved in [results/baseline_run.txt](results/baseline_run.txt).
+Ran `make run`, then `make -B run` to force compilation of all sources. The rebuild completed without compiler warnings. The original run is recorded separately; `make run` now also includes the Part 7 comparison case.
 
-1. The programs generated these eight CSV files:
+1. The programs generate these ten CSV files:
 
    - `output/good_sampling_signal.csv`
    - `output/good_sampling_spectrum.csv`
@@ -20,6 +20,8 @@ Ran `make run` successfully, then `make -B run` to force compilation of all sour
    - `output/undersampled_spectrum.csv`
    - `output/short_record_signal.csv`
    - `output/short_record_spectrum.csv`
+   - `output/long_record_signal.csv`
+   - `output/long_record_spectrum.csv`
    - `output/coupled_oscillators_time.csv`
    - `output/coupled_oscillators_spectrum.csv`
 
@@ -27,13 +29,14 @@ Ran `make run` successfully, then `make -B run` to force compilation of all sour
 3. `src/coupled_oscillators_fft.c` (executable `build/coupled_oscillators_fft`) integrates a mechanical system and analyzes its displacement.
 4. The well-sampled case reports **50.000 Hz** and **120.000 Hz**, with amplitudes **1.0000** and **0.7000**, respectively.
 
-The baseline sampling results were:
+The sampling results are:
 
 | Case | $f_s$ (Hz) | $N$ | $T=N/f_s$ (s) | $f_N$ (Hz) | $\Delta f$ (Hz) | Reported local peaks (Hz) |
 |---|---:|---:|---:|---:|---:|---|
 | good_sampling | 512 | 512 | 1 | 256 | 1 | 50, 120 |
 | undersampled | 128 | 128 | 1 | 64 | 1 | 50, 8 |
 | short_record | 512 | 64 | 0.125 | 256 | 8 | 48 |
+| long_record (option B) | 512 | 512 | 1 | 256 | 1 | 50, 55 |
 
 ## Part 3: Sampling and aliasing
 
@@ -97,10 +100,10 @@ I would first increase the **total acquisition time**, collecting more samples a
 
 ## Part 6: Plot inspection
 
-Ran `make plot-python` successfully. It generated `plots/sampling_signals.png`, `plots/sampling_spectra.png`, `plots/coupled_oscillators_time.png`, and `plots/coupled_oscillators_spectrum.png`.
+Ran `make plot-python` successfully. It generates `plots/sampling_signals.png`, `plots/sampling_spectra.png`, `plots/record_length_comparison.png`, `plots/coupled_oscillators_time.png`, and `plots/coupled_oscillators_spectrum.png`.
 
 1. The middle panel of [sampling_spectra.png](plots/sampling_spectra.png) makes aliasing easiest to see, especially compared with the top panel: the 120 Hz peak is replaced by an 8 Hz peak while 50 Hz remains.
-2. The bottom panel of the same figure makes limited resolution easiest to see. The 48 and 56 Hz bins carry substantial amplitude, with no resolved valley between two peaks at the actual frequencies 50 and 55 Hz.
+2. The third panel of the same figure shows limited resolution in the 64-sample record. The 48 and 56 Hz bins carry substantial amplitude, with no resolved valley between two peaks at the actual frequencies 50 and 55 Hz. The fourth panel shows the longer record. The focused [record-length comparison](plots/record_length_comparison.png) makes the difference easiest to see.
 3. In [coupled_oscillators_spectrum.png](plots/coupled_oscillators_spectrum.png), both numerical peaks line up closely with the theoretical dashed reference lines:
 
 | Mode | Theory (Hz) | FFT peak (Hz) | FFT minus theory (Hz) | Measured amplitude (m) |
@@ -114,7 +117,7 @@ Ran `make plot-python` successfully. It generated `plots/sampling_signals.png`, 
 
 ### Modification and prediction before rerunning
 
-I edited the `short_record` case in `src/sampling_demo.c`, increasing `sample_count` from `64U` to `512U` while keeping `sample_rate_hz = 512.0` and the same 50 Hz + 55 Hz signal. The sample count remains a power of two as required by the radix-2 FFT. I also updated the printed description for the longer-record experiment.
+I kept `short_record` at 64 samples and added `long_record` with 512 samples in `src/sampling_demo.c`. Both use `sample_rate_hz = 512.0` and the same 50 Hz + 55 Hz signal. The sample counts remain powers of two as required by the radix-2 FFT. Running the program now prints both results in sequence and writes separate CSV files.
 
 The prediction was:
 
@@ -125,14 +128,13 @@ This is eight times the original duration and one eighth of the original bin spa
 
 ### Execution and comparison
 
-After editing, I ran:
+To reproduce both cases and the plots, run:
 
 ```bash
-make all > results/part7/build.txt 2>&1
-./build/sampling_demo results/part7 > results/part7/run.txt
+make plot-python
 ```
 
-The [run log](results/part7/run.txt) reports:
+The `long_record` section of the program output reports:
 
 ```text
 sampling rate = 512.0 Hz, Nyquist = 256.0 Hz, duration = 1.000 s
@@ -151,20 +153,8 @@ peak 2: f = 55.000 Hz, amplitude = 0.8500
 
 The result agrees with the prediction: the two true components become cleanly distinguishable. This demonstrates improvement through a longer acquisition, with no change in the sampling rate.
 
-![Comparison of the original and longer-record spectra](results/part7/comparison.png)
+![Original and longer-record spectra](plots/record_length_comparison.png)
 
-The experimental [signal](results/part7/short_record_signal.csv), [spectrum](results/part7/short_record_spectrum.csv), and [source patch](results/part7/option_b.patch) are retained. The case filename remains `short_record` to match the original program, although this experimental copy contains 512 samples.
-
-After the experiment I restored the original source and rebuilt it, keeping `output/` and `plots/` consistent with the baseline answers. To reproduce option B from the restored source, run:
-
-```bash
-patch -p1 < results/part7/option_b.patch
-make all
-./build/sampling_demo results/part7
-patch -R -p1 < results/part7/option_b.patch
-make all
-```
-
-## Part 8: Reflection
-
-I learned that sampling fast enough and observing long enough solve different problems: the sampling rate controls aliasing, while observation time controls the FFT bin spacing and helps separate nearby frequencies. The project also showed how shared numerical utilities, separate application sources, CSV outputs, and automated plotting targets make a scientific calculation easier to understand and reproduce. I would extend it with a comparison of rectangular and Hann windows, including amplitude correction, to explore how reduced spectral leakage trades off against broader peaks when frequencies fall between FFT bins.
+The generated `output/short_record_spectrum.csv` and
+`output/long_record_spectrum.csv` contain the two FFTs. `make run` recreates
+these files directly from the current source; no patch is needed.

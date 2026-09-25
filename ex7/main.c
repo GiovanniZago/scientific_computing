@@ -24,7 +24,7 @@ int main(void) {
     FILE *file;
     int i;
 
-    /* 1. Coin tosses: the running fraction should approach 0.5. */
+    // 1. Coin tosses: the running fraction should approach 0.5.
     file = fopen("coin.csv", "w");
     if (file == NULL) return 1;
     fprintf(file, "tosses,fraction_heads\n");
@@ -37,7 +37,7 @@ int main(void) {
     fclose(file);
     printf("Coin tosses: %d / 100000 heads = %.6f\n", heads, heads / 100000.0);
 
-    /* 2. Estimate pi with two LCG streams, as in the notebook. */
+    // 2. Estimate pi with two LCG streams, as in the notebook.
     file = fopen("pi.csv", "w");
     if (file == NULL) return 1;
     fprintf(file, "N,pi_estimate,absolute_error\n");
@@ -56,7 +56,7 @@ int main(void) {
     }
     fclose(file);
 
-    /* 3. Histogram of Y=U^2, compared with f(y)=1/(2 sqrt(y)). */
+    // 3. Histogram of Y=U^2, compared with f(y)=1/(2 sqrt(y)).
     int square_bins[80] = {0};
     state = 13579u;
     for (i = 0; i < n; i++) {
@@ -76,7 +76,7 @@ int main(void) {
     }
     fclose(file);
 
-    /* 4 and 5. Exponential histogram and empirical CDF from one sample. */
+    // 4 and 5. Exponential histogram and empirical CDF from one sample.
     double *sample = malloc((size_t)n * sizeof(double));
     if (sample == NULL) return 1;
     int exp_bins[80] = {0};

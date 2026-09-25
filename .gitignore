@@ -1,6 +1,5 @@
 *.out
 *.txt
-*.png
 *.csv
 *.h5
 *.patch

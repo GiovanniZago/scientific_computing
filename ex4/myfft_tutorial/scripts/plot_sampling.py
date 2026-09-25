@@ -46,7 +46,7 @@ def read_csv_columns(path: Path) -> tuple[list[float], list[float]]:
 
 
 def plot_sampling_signals() -> None:
-    """Plot the time-domain signals for the three sampling experiments."""
+    """Plot the time-domain signals for the four sampling experiments."""
     cases = [
         (
             "good_sampling_signal.csv",
@@ -58,11 +58,15 @@ def plot_sampling_signals() -> None:
         ),
         (
             "short_record_signal.csv",
-            "Short record: nearby frequencies cannot be separated well",
+            "Short record: 0.125 s at 512 Hz",
+        ),
+        (
+            "long_record_signal.csv",
+            "Long record: 1 s at 512 Hz",
         ),
     ]
 
-    fig, axes = plt.subplots(3, 1, figsize=(14, 9), constrained_layout=True)
+    fig, axes = plt.subplots(4, 1, figsize=(14, 12), constrained_layout=True)
     fig.suptitle("Sampling demo: time-domain signals")
 
     for axis, (filename, title) in zip(axes, cases):
@@ -92,12 +96,17 @@ def plot_sampling_spectra() -> None:
         ),
         (
             "short_record_spectrum.csv",
-            "Short-record spectrum",
+            "Short record: 8 Hz bin spacing",
+            (0.0, 120.0),
+        ),
+        (
+            "long_record_spectrum.csv",
+            "Long record: 1 Hz bin spacing",
             (0.0, 120.0),
         ),
     ]
 
-    fig, axes = plt.subplots(3, 1, figsize=(14, 9), constrained_layout=True)
+    fig, axes = plt.subplots(4, 1, figsize=(14, 12), constrained_layout=True)
     fig.suptitle("Sampling demo: FFT amplitude spectra")
 
     for axis, (filename, title, x_limits) in zip(axes, cases):
@@ -113,11 +122,35 @@ def plot_sampling_spectra() -> None:
     plt.close(fig)
 
 
+def plot_record_length_comparison() -> None:
+    """Show the same two-tone signal before and after increasing record length."""
+    fig, axes = plt.subplots(2, 1, figsize=(10, 6), sharex=True, constrained_layout=True)
+    fig.suptitle("50 Hz + 55 Hz: effect of observation time")
+
+    for axis, filename, title in zip(
+        axes,
+        ("short_record_spectrum.csv", "long_record_spectrum.csv"),
+        ("64 samples, 0.125 s, 8 Hz bins", "512 samples, 1 s, 1 Hz bins"),
+    ):
+        frequency_hz, amplitude = read_csv_columns(OUTPUT_DIR / filename)
+        axis.vlines(frequency_hz, 0.0, amplitude, linewidth=1.5)
+        axis.set_title(title)
+        axis.set_xlim(35.0, 70.0)
+        axis.set_ylim(0.0, 1.1)
+        axis.set_ylabel("Amplitude")
+        axis.grid(True, alpha=0.3)
+
+    axes[-1].set_xlabel("Frequency (Hz)")
+    fig.savefig(PLOT_DIR / "record_length_comparison.png", dpi=150)
+    plt.close(fig)
+
+
 def main() -> None:
-    """Create the output directory and generate both sampling figures."""
+    """Create the output directory and generate sampling figures."""
     PLOT_DIR.mkdir(exist_ok=True)
     plot_sampling_signals()
     plot_sampling_spectra()
+    plot_record_length_comparison()
 
 
 if __name__ == "__main__":

@@ -4,26 +4,6 @@
 #include <math.h>
 #include <gsl/gsl_sf_legendre.h>
 
-double lpDirectRec(int L, double x) {
-    if (L == 0) {
-        return 1.0;
-    }
-    
-    if (L == 1) {
-        return x;
-    }
-
-    int M = L - 1;
-
-    double c1 = (2.0 * M + 1.0) / (M + 1.0);
-    double c2 = (-1.0) * M / (M + 1.0);
-
-    double t1 = c1 * x * lpDirectRec(M, x);
-    double t2 = c2 * lpDirectRec(M - 1, x);
-
-    return t1 + t2;
-}
-
 double lpDirect(int L, double x) {
     double p_m = 1.0, p = x, p_n = 0.0;
 

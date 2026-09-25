@@ -1,15 +1,10 @@
-"""Plot the five CSV files written by main.out."""
-
 import csv
-
 import matplotlib.pyplot as plt
-
 
 def read_columns(filename):
     with open(filename, newline="") as file:
         rows = list(csv.DictReader(file))
     return {name: [float(row[name]) for row in rows] for name in rows[0]}
-
 
 if __name__ == "__main__":
     # 1. Running fraction of heads.
