@@ -3,4 +3,8 @@
 *.png
 *.csv
 *.h5
+*.patch
+*.gp
 parser
+.mplconfig
+build

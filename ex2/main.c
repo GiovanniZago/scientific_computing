@@ -53,23 +53,25 @@ int main(void) {
     float *y_vec = malloc(N * sizeof(float));
     float *d_vec = malloc(N * sizeof(float));
 
-    // vector addition
+    // vector initialization
     for (int i = 0; i < N; ++i) {
         x_vec[i] = x;
         y_vec[i] = y;
         d_vec[i] = a * x_vec[i] + y_vec[i];
     }
 
+    // vector addition
+    for (int i = 0; i < N; ++i) {
+        d_vec[i] = a * x_vec[i] + y_vec[i];
+    }
+
     // result check
     float ref = a * x + y;
-    double sum = 0.0;
     int errors = 0;
     for (int i = 0; i < N; ++i) {
         if (fabs(d_vec[i] - ref) > 1e-8f) {
             ++errors;
         }
-
-        sum += d_vec[i];
     }
 
     // free memory
@@ -80,7 +82,6 @@ int main(void) {
     // print results
     printf("\n\n\n");
     printf("Errors found: %d\n", errors);
-    printf("Element-wise sum: %lf\n", sum);
 
     return 0;
 }

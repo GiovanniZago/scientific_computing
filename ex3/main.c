@@ -3,6 +3,7 @@
 #include <sys/types.h>
 #include <math.h>
 #include <time.h>
+#include <string.h>
 
 int main(void) {
     char *line = NULL;
@@ -68,8 +69,28 @@ int main(void) {
     // time initialization 
     clock_t end_init = clock();
 
-    // time mmul
-    clock_t begin_mmul = clock();
+    // time naive mmul
+    clock_t begin_mmul_naive = clock();
+
+    // full matrix-matrix multiplication in the naive way
+    for (int i = 0; i < N; ++i) {
+        for (int j = 0; j < N; ++j) {
+                for (int k = 0; k < N; ++k) {
+                C_rows[i][j] += A_rows[i][k] * B_rows[k][j];
+            }
+        }
+    }
+
+    // time naive mmul
+    clock_t end_mmul_naive = clock();
+
+    // reset matrix
+    for (int i = 0; i < N; ++i) { 
+        memset(C_rows[i], 0.0f, N * sizeof(float));
+    } 
+
+    // time efficient mmul
+    clock_t begin_mmul_eff = clock();
 
     // full matrix-matrix multiplication in the efficient way
     for (int i = 0; i < N; ++i) {
@@ -80,21 +101,37 @@ int main(void) {
         }
     }
 
-    // time mmul
-    clock_t end_mmul = clock();
+    // time efficient mmul
+    clock_t end_mmul_eff = clock();
 
     // time check
     clock_t begin_check = clock();
 
     // check that the sum of the element on the diagonal is N * a * b
-    float sum = 0.0, ref = a * b;
+    double sum = 0.0;
+    double ref = (double) N * (double) (a * b);
     for (int i = 0; i < N; ++i) {
-        sum += C_rows[i][i] / ref;
+        sum += C_rows[i][i];
     }
-    int check = (fabs(sum - (float) N) < 1e-8) ? 0 : 1;
+    int check = (fabs(sum - ref) < 1e-8) ? 0 : 1;
 
     // time check
     clock_t end_check = clock();
+
+    // save C as a text matrix, with one row per line
+    FILE *file = fopen("C.txt", "w");
+    if (file == NULL) {
+        perror("Cannot open C.txt");
+        return EXIT_FAILURE;
+    }
+    for (int i = 0; i < N; ++i) {
+        for (int j = 0; j < N; ++j) {
+            if (j > 0) fprintf(file, " ");
+            fprintf(file, "%12.6f", C_rows[i][j]);
+        }
+        fprintf(file, "\n");
+    }
+    fclose(file);
 
     // free memory
     free(line);
@@ -107,18 +144,20 @@ int main(void) {
 
     // Final report
     double time_init = (double) (end_init - begin_init) / CLOCKS_PER_SEC;
-    double time_mmul = (double) (end_mmul - begin_mmul) / CLOCKS_PER_SEC;
+    double time_mmul_naive = (double) (end_mmul_naive - begin_mmul_naive) / CLOCKS_PER_SEC;
+    double time_mmul_eff = (double) (end_mmul_eff - begin_mmul_eff) / CLOCKS_PER_SEC;
     double time_check = (double) (end_check - begin_check) / CLOCKS_PER_SEC;
     printf("\n\nMatrix-matrix multiplication done for N=%d, a=%f, b=%f\n", N, a, b);
     printf("t_init = %f s\n", time_init);
-    printf("t_mmul = %f s\n", time_mmul);
+    printf("t_mmul_naive = %f s\n", time_mmul_naive);
+    printf("t_mmul_efficient = %f s\n", time_mmul_eff);
     printf("t_check = %f s\n", time_check);
 
     if (check == 0) {
         printf("Test succeeded!\n");
     }
     else {
-        printf("Test failed, Reference: %d, Sum: %f\n", N, sum);
+        printf("Test failed, Reference: %lf, Sum: %lf\n", ref, sum);
         exit(EXIT_FAILURE);
     }
 
